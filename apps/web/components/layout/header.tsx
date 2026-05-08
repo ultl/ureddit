@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, Plus, Search, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { Plus, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { NotificationBell } from "./notification-bell";
+import { SearchBar } from "./search-bar";
 
 export function Header() {
   const { data: session } = useSession();
@@ -26,14 +27,7 @@ export function Header() {
           <span className="text-base">ureddit</span>
         </Link>
 
-        <div className="relative flex-1 max-w-md">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search ureddit"
-            className="pl-8 rounded-full bg-muted"
-          />
-        </div>
+        <SearchBar />
 
         <div className="ml-auto flex items-center gap-2">
           {user ? (
@@ -45,11 +39,7 @@ export function Header() {
                 </Button>
               </Link>
 
-              <Link href="/notifications">
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-4 w-4" />
-                </Button>
-              </Link>
+              <NotificationBell />
 
               <DropdownMenu>
                 <DropdownMenuTrigger

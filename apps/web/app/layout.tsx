@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
+import { SSEProvider } from "@/providers/sse-provider";
 import { Header } from "@/components/layout/header";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -22,11 +23,13 @@ export default function RootLayout({
     <html lang="en" className={geist.variable}>
       <body className="bg-background text-foreground font-sans antialiased">
         <QueryProvider>
-          <TooltipProvider>
-            <Header />
-            {children}
-            <Toaster />
-          </TooltipProvider>
+          <SSEProvider>
+            <TooltipProvider>
+              <Header />
+              {children}
+              <Toaster />
+            </TooltipProvider>
+          </SSEProvider>
         </QueryProvider>
       </body>
     </html>

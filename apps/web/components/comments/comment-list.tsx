@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CommentItem } from "./comment-item";
 import { CommentForm } from "./comment-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSubscribePost, useSSEListener } from "@/providers/sse-provider";
 
 export type CommentNode = {
   id: string;
@@ -41,6 +42,21 @@ function buildTree(flat: FlatComment[]): CommentNode[] {
   return roots;
 }
 
+function hasNode(nodes: CommentNode[], id: string): boolean {
+  for (const n of nodes) {
+    if (n.id === id) return true;
+    if (hasNode(n.children, id)) return true;
+  }
+  return false;
+}
+
+function insertInto(nodes: CommentNode[], newComment: CommentNode): CommentNode[] {
+  return nodes.map((n) => {
+    if (n.id === newComment.parentId) return { ...n, children: [...n.children, newComment] };
+    return { ...n, children: insertInto(n.children, newComment) };
+  });
+}
+
 const SORTS = ["best", "top", "new", "old", "controversial"] as const;
 type Sort = (typeof SORTS)[number];
 
@@ -50,6 +66,8 @@ export function CommentList({ postId, communityName }: Props) {
   const [sort, setSort] = useState<Sort>("best");
   const [tree, setTree] = useState<CommentNode[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useSubscribePost(postId);
 
   useEffect(() => {
     setLoading(true);
@@ -61,19 +79,17 @@ export function CommentList({ postId, communityName }: Props) {
       });
   }, [postId, sort]);
 
-  function addComment(newComment: CommentNode) {
-    if (!newComment.parentId) {
-      setTree((prev) => [newComment, ...prev]);
-      return;
-    }
-    function insertInto(nodes: CommentNode[]): CommentNode[] {
-      return nodes.map((n) => {
-        if (n.id === newComment.parentId) return { ...n, children: [...n.children, newComment] };
-        return { ...n, children: insertInto(n.children) };
-      });
-    }
-    setTree((prev) => insertInto(prev));
-  }
+  const addComment = useCallback((newComment: CommentNode) => {
+    setTree((prev) => {
+      if (hasNode(prev, newComment.id)) return prev;
+      if (!newComment.parentId) return [newComment, ...prev];
+      return insertInto(prev, newComment);
+    });
+  }, []);
+
+  useSSEListener<FlatComment>("comment", (data) => {
+    addComment({ ...data, children: [] });
+  });
 
   return (
     <Card>

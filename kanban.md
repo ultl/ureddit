@@ -155,44 +155,44 @@ Tasks are grouped by epic. Work top-to-bottom within each epic — later tasks d
 
 ## Epic 11 — Real-time (SSE)
 
-- [ ] `GET /api/sse` — route handler: `ReadableStream`, `force-dynamic`, subscribes to Redis channels for the auth user
-- [ ] On connect: subscribe to `notifications:[userId]`; if `?postId=` param provided, also subscribe to `post:[postId]:comments`
-- [ ] On Redis message: encode as SSE event and enqueue to stream
-- [ ] On disconnect (`req.signal` abort): unsubscribe from Redis channels, close stream
-- [ ] Client hook `useSSE(postId?)` — opens `EventSource`, dispatches events, cleans up on unmount
-- [ ] Wire comment real-time: new comment events received via SSE appended to comment list
-- [ ] Wire notification real-time: notification events update bell badge count
-- [ ] Community online count: on SSE connect, `SADD community:[id]:online [userId]` with 60s TTL; heartbeat every 30s refreshes TTL; display `SCARD` result in community sidebar
+- [x] `GET /api/sse` — route handler: `ReadableStream`, `force-dynamic`, subscribes to Redis channels for the auth user
+- [x] On connect: subscribe to `notifications:[userId]`; if `?postId=` param provided, also subscribe to `post:[postId]:comments`
+- [x] On Redis message: encode as SSE event and enqueue to stream
+- [x] On disconnect (`req.signal` abort): unsubscribe from Redis channels, close stream
+- [x] Client hook `useSSE(postId?)` — opens `EventSource`, dispatches events, cleans up on unmount
+- [x] Wire comment real-time: new comment events received via SSE appended to comment list
+- [x] Wire notification real-time: notification events update bell badge count
+- [x] Community online count: on SSE connect, `SADD community:[id]:online [userId]` with 60s TTL; heartbeat every 30s refreshes TTL; display `SCARD` result in community sidebar
 
 ---
 
 ## Epic 12 — Notifications
 
-- [ ] Notifications page layout (`/notifications`) — list of notifications sorted by `createdAt` desc
-- [ ] Notification row component: type icon, actor name, linked post/comment preview, timestamp, read/unread indicator
-- [ ] `POST /api/notifications/read` — sets all `notifications.read = true` for auth user
-- [ ] Mark all as read on notifications page load
-- [ ] Real-time bell badge: unread count from `notifications` table on page load, incremented via SSE events
+- [x] Notifications page layout (`/notifications`) — list of notifications sorted by `createdAt` desc
+- [x] Notification row component: type icon, actor name, linked post/comment preview, timestamp, read/unread indicator
+- [x] `POST /api/notifications/read` — sets all `notifications.read = true` for auth user
+- [x] Mark all as read on notifications page load
+- [x] Real-time bell badge: unread count from `notifications` table on page load, incremented via SSE events
 
 ---
 
 ## Epic 13 — Search
 
-- [ ] `GET /api/search?q=` — proxy query to Meilisearch, return results from posts/communities/users indexes
-- [ ] Search bar with debounce (300ms)
-- [ ] Search results dropdown: shows top 3 results per category (posts, communities, users) with icons and metadata
-- [ ] Keyboard navigation in search dropdown (arrow keys, Enter, Escape)
-- [ ] Clear search on route change
+- [x] `GET /api/search?q=` — proxy query to Meilisearch, return results from posts/communities/users indexes
+- [x] Search bar with debounce (300ms)
+- [x] Search results dropdown: shows top 3 results per category (posts, communities, users) with icons and metadata
+- [x] Keyboard navigation in search dropdown (arrow keys, Enter, Escape)
+- [x] Clear search on route change
 
 ---
 
 ## Epic 14 — User Profiles
 
-- [ ] Profile page layout (`/user/[username]`) — avatar, banner, display name, bio, karma scores, join date
-- [ ] Posts tab — paginated list of posts authored by this user (reuse post card)
-- [ ] Comments tab — list of comments authored by this user with post context link
-- [ ] Saved tab — visible only to profile owner; shows saved posts and comments
-- [ ] `GET /api/users/[username]` — fetch profile data
+- [x] Profile page layout (`/user/[username]`) — avatar, banner, display name, bio, karma scores, join date
+- [x] Posts tab — paginated list of posts authored by this user (reuse post card)
+- [x] Comments tab — list of comments authored by this user with post context link
+- [x] Saved tab — visible only to profile owner; shows saved posts and comments
+- [x] `GET /api/users/[username]` — fetch profile data
 - [ ] Enqueue Meilisearch sync job after profile update
 
 ---

@@ -86,6 +86,7 @@ export async function POST(
     parentId: parentId ?? null,
     depth,
   }).returning();
+  if (!comment) return NextResponse.json({ error: "Failed to create comment" }, { status: 500 });
 
   // Increment post comment count
   await db.update(posts).set({ commentCount: sql`${posts.commentCount} + 1` }).where(eq(posts.id, postId));
@@ -104,24 +105,38 @@ export async function POST(
     if (parsed.content) findMentions(parsed.content);
   } catch { /* not JSON */ }
 
-  // Notify parent comment author (comment_reply)
+  // Build the set of users to notify (deduped, excluding the comment author)
+  type Notify = { recipientId: string; type: "post_reply" | "comment_reply" | "mention" };
+  const toNotify: Notify[] = [];
+
   if (parentId) {
     const [parent] = await db.select({ authorId: comments.authorId }).from(comments).where(eq(comments.id, parentId));
     if (parent && parent.authorId !== userId) {
-      await db.insert(notifications).values({
-        id: nanoid(), userId: parent.authorId, type: "comment_reply",
-        actorId: userId, postId, commentId: id,
-      }).onConflictDoNothing();
+      toNotify.push({ recipientId: parent.authorId, type: "comment_reply" });
+    }
+  } else {
+    const [post] = await db.select({ authorId: posts.authorId }).from(posts).where(eq(posts.id, postId));
+    if (post && post.authorId !== userId) {
+      toNotify.push({ recipientId: post.authorId, type: "post_reply" });
     }
   }
 
-  // Notify @mentioned users
   const uniqueMentions = [...new Set(mentionUserIds)].filter((uid) => uid !== userId);
-  if (uniqueMentions.length > 0) {
+  for (const uid of uniqueMentions) {
+    if (!toNotify.some((n) => n.recipientId === uid)) {
+      toNotify.push({ recipientId: uid, type: "mention" });
+    }
+  }
+
+  if (toNotify.length > 0) {
     await db.insert(notifications).values(
-      uniqueMentions.map((uid) => ({
-        id: nanoid(), userId: uid, type: "mention" as const,
-        actorId: userId, postId, commentId: id,
+      toNotify.map((n) => ({
+        id: nanoid(),
+        userId: n.recipientId,
+        type: n.type,
+        actorId: userId,
+        postId,
+        commentId: id,
       }))
     ).onConflictDoNothing();
   }
@@ -129,7 +144,23 @@ export async function POST(
   // Publish to Redis for SSE
   try {
     const pub = createRedisClient();
-    await pub.publish(`post:${postId}:comments`, JSON.stringify({ ...comment, authorName: session.user.name, authorImage: session.user.image, userVote: 0 }));
+    await pub.publish(
+      `post:${postId}:comments`,
+      JSON.stringify({ ...comment, authorName: session.user.name, authorImage: session.user.image, userVote: 0 })
+    );
+    for (const n of toNotify) {
+      await pub.publish(
+        `notifications:${n.recipientId}`,
+        JSON.stringify({
+          type: n.type,
+          actorId: userId,
+          actorName: session.user.name,
+          postId,
+          commentId: id,
+          createdAt: comment.createdAt,
+        })
+      );
+    }
     await pub.quit();
   } catch { /* SSE not critical */ }
 

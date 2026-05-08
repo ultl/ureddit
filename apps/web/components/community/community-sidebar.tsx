@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { CommunityOnline } from "./community-online";
 import { formatDistanceToNow } from "date-fns";
 
 type Community = {
@@ -46,9 +47,12 @@ export function CommunitySidebar({ community, rules, flairs }: Props) {
           )}
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-semibold">{community.memberCount.toLocaleString()}</span>
-            <span className="text-muted-foreground">members</span>
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">{community.memberCount.toLocaleString()}</span>
+              <span className="text-muted-foreground">members</span>
+            </div>
+            <CommunityOnline communityId={community.id} communityName={community.name} />
           </div>
           <p className="text-xs text-muted-foreground">
             Created {formatDistanceToNow(new Date(community.createdAt), { addSuffix: true })}

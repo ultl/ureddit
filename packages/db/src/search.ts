@@ -12,7 +12,10 @@ export async function setupIndexes() {
 
   await meili.index("posts").updateSettings({
     searchableAttributes: ["title", "content", "linkPreviewTitle"],
-    displayedAttributes: ["id", "title", "type", "authorId", "communityId", "score", "commentCount", "createdAt"],
+    displayedAttributes: [
+      "id", "title", "type", "authorId", "authorName",
+      "communityId", "communityName", "score", "commentCount", "createdAt",
+    ],
     sortableAttributes: ["score", "createdAt"],
   });
 

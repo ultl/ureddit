@@ -1,0 +1,42 @@
+{
+  "name": "@repo/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./client": "./src/client.ts",
+    "./storage": "./src/storage.ts",
+    "./search": "./src/search.ts",
+    "./redis": "./src/redis.ts",
+    "./queue": "./src/queue.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "seed": "bun run src/seed.ts",
+    "worker": "bun run src/worker.ts",
+    "setup": "bun run src/setup.ts",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1045.0",
+    "@aws-sdk/s3-presigned-post": "^3.1045.0",
+    "@aws-sdk/s3-request-presigner": "^3.1045.0",
+    "@faker-js/faker": "^10.4.0",
+    "bullmq": "^5.76.6",
+    "drizzle-orm": "^0.45.2",
+    "ioredis": "^5.10.1",
+    "meilisearch": "^0.58.0",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/node": "^25.6.2",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "5.9.2"
+  }
+}

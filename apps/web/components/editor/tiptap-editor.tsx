@@ -33,8 +33,8 @@ export function TiptapEditor({ placeholder, onChange, initialContent, className,
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-muted px-3 py-2 text-sm focus-within:border-primary transition-colors cursor-text",
-        className
+        "rounded-lg border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-sm transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 cursor-text",
+        className,
       )}
       style={{ minHeight }}
       onClick={() => editor?.commands.focus()}

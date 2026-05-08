@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 
 type Community = {
@@ -26,7 +27,10 @@ export function CommunityHeader({ community, isMember: initialMember, userId }: 
   const router = useRouter();
 
   async function toggleMembership() {
-    if (!userId) { router.push("/sign-in"); return; }
+    if (!userId) {
+      router.push("/sign-in");
+      return;
+    }
     setLoading(true);
     const endpoint = isMember ? "leave" : "join";
     await fetch(`/api/communities/${community.name}/${endpoint}`, { method: "POST" });
@@ -37,25 +41,21 @@ export function CommunityHeader({ community, isMember: initialMember, userId }: 
 
   return (
     <div>
-      {/* Banner */}
       <div className="h-24 w-full bg-gradient-to-r from-orange-400 to-orange-600 sm:h-32">
         {community.banner && (
           <img src={community.banner} alt="" className="h-full w-full object-cover" />
         )}
       </div>
 
-      {/* Community info bar */}
       <div className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-end gap-4 px-4 pb-3 pt-0 -mt-4">
-          {/* Icon */}
-          <div className="shrink-0">
-            {community.icon ? (
-              <img src={community.icon} alt="" className="h-16 w-16 rounded-full border-4 border-card object-cover" />
-            ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-card bg-orange-500 text-2xl font-bold text-white">
+          <div className="shrink-0 rounded-full ring-4 ring-card">
+            <Avatar size="lg" className="size-16">
+              {community.icon && <AvatarImage src={community.icon} alt="" />}
+              <AvatarFallback className="bg-orange-500 text-2xl font-bold text-white">
                 {community.displayName[0]}
-              </div>
-            )}
+              </AvatarFallback>
+            </Avatar>
           </div>
 
           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pb-1">

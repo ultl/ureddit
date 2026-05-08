@@ -3,6 +3,8 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { Header } from "@/components/layout/header";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -20,8 +22,11 @@ export default function RootLayout({
     <html lang="en" className={geist.variable}>
       <body className="bg-background text-foreground font-sans antialiased">
         <QueryProvider>
-          <Header />
-          {children}
+          <TooltipProvider>
+            <Header />
+            {children}
+            <Toaster />
+          </TooltipProvider>
         </QueryProvider>
       </body>
     </html>

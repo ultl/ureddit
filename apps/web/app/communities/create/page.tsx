@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export default function CreateCommunityPage() {
   const router = useRouter();
@@ -24,7 +27,7 @@ export default function CreateCommunityPage() {
     });
 
     if (!res.ok) {
-      const data = await res.json() as { error: string };
+      const data = (await res.json()) as { error: string };
       setError(data.error ?? "Something went wrong");
       setLoading(false);
       return;
@@ -38,11 +41,14 @@ export default function CreateCommunityPage() {
       <h1 className="text-2xl font-bold mb-6">Create a community</h1>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Name</label>
-          <div className="flex items-center rounded-md border border-border bg-muted px-3 py-2 text-sm">
-            <span className="text-muted-foreground mr-1">u/</span>
-            <input
-              className="flex-1 bg-transparent outline-none"
+          <Label htmlFor="name">Name</Label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              u/
+            </span>
+            <Input
+              id="name"
+              className="pl-8"
               placeholder="community_name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -50,13 +56,15 @@ export default function CreateCommunityPage() {
               required
             />
           </div>
-          <p className="text-xs text-muted-foreground">3–21 characters, letters, numbers, underscores only. Cannot be changed.</p>
+          <p className="text-xs text-muted-foreground">
+            3–21 characters, letters, numbers, underscores only. Cannot be changed.
+          </p>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Display name</label>
-          <input
-            className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm outline-none focus:border-primary"
+          <Label htmlFor="displayName">Display name</Label>
+          <Input
+            id="displayName"
             placeholder="My Community"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
@@ -65,9 +73,12 @@ export default function CreateCommunityPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Description <span className="text-muted-foreground font-normal">(optional)</span></label>
-          <textarea
-            className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm outline-none focus:border-primary resize-none"
+          <Label htmlFor="description">
+            Description{" "}
+            <span className="text-muted-foreground font-normal">(optional)</span>
+          </Label>
+          <Textarea
+            id="description"
             rows={3}
             placeholder="What is your community about?"
             value={description}
@@ -78,7 +89,9 @@ export default function CreateCommunityPage() {
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
           <Button type="submit" disabled={loading}>
             {loading ? "Creating…" : "Create community"}
           </Button>

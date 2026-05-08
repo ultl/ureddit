@@ -4,7 +4,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { PostCard, type PostItem } from "./post-card";
 import { Loader2, LayoutList, AlignJustify } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type FeedResponse = {
   posts: PostItem[];
@@ -86,43 +89,39 @@ export function Feed({ communityId }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Toolbar: sort + view toggle */}
-      <div className="flex items-center gap-1 rounded-lg border border-border bg-card px-2 py-1.5">
-        {SORTS.map((s) => (
-          <button
-            key={s.value}
-            onClick={() => setSort(s.value)}
-            className={cn(
-              "rounded px-3 py-1 text-sm font-medium transition-colors",
-              sort === s.value
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted"
-            )}
-          >
-            {s.label}
-          </button>
-        ))}
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            onClick={() => setView("card")}
-            className={cn("rounded p-1.5 transition-colors", view === "card" ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted")}
-            title="Card view"
-          >
+      <Card size="sm" className="flex-row items-center gap-2 px-3 py-2">
+        <Tabs value={sort} onValueChange={(v) => setSort(v as Sort)}>
+          <TabsList>
+            {SORTS.map((s) => (
+              <TabsTrigger key={s.value} value={s.value}>
+                {s.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        <ToggleGroup
+          value={[view]}
+          onValueChange={(v) => {
+            const next = Array.isArray(v) ? v[0] : v;
+            if (next) setView(next as ViewMode);
+          }}
+          className="ml-auto"
+        >
+          <ToggleGroupItem value="card" aria-label="Card view">
             <LayoutList className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setView("compact")}
-            className={cn("rounded p-1.5 transition-colors", view === "compact" ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted")}
-            title="Compact view"
-          >
+          </ToggleGroupItem>
+          <ToggleGroupItem value="compact" aria-label="Compact view">
             <AlignJustify className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </Card>
 
       {status === "pending" && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
         </div>
       )}
       {status === "error" && (

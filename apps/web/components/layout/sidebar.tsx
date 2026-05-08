@@ -3,6 +3,14 @@ import { db } from "@repo/db/client";
 import { communities, recentCommunities } from "@repo/db/schema";
 import { desc, eq, inArray } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 async function getTopCommunities() {
   return db
@@ -39,13 +47,39 @@ async function getRecentCommunities(userId: string) {
     .from(communities)
     .where(inArray(communities.id, ids));
 
-  // Preserve visited order
   return recent.map((r) => rows.find((c) => c.id === r.communityId)).filter(Boolean);
 }
 
 type Props = {
   userId?: string;
 };
+
+type CommunitySummary = {
+  id: string;
+  name: string;
+  displayName: string;
+  icon: string | null;
+};
+
+function CommunityRow({ community, rank }: { community: CommunitySummary; rank?: number }) {
+  return (
+    <Link
+      href={`/u/${community.name}`}
+      className="flex items-center gap-3 rounded-md p-1.5 hover:bg-muted text-sm transition-colors"
+    >
+      {rank !== undefined && (
+        <span className="text-muted-foreground w-4 text-xs">{rank}</span>
+      )}
+      <Avatar size="sm">
+        {community.icon && <AvatarImage src={community.icon} alt="" />}
+        <AvatarFallback className="bg-orange-500 text-white text-[10px] font-bold">
+          {community.displayName[0]}
+        </AvatarFallback>
+      </Avatar>
+      <span className="font-medium">u/{community.name}</span>
+    </Link>
+  );
+}
 
 export async function Sidebar({ userId }: Props) {
   const [topCommunities, recentComms] = await Promise.all([
@@ -55,77 +89,64 @@ export async function Sidebar({ userId }: Props) {
 
   return (
     <aside className="w-80 shrink-0 space-y-4">
-      {/* Home card */}
-      <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🏠</span>
-          <span className="font-semibold">Home</span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Your personal ureddit frontpage. Come here to check in with your favourite communities.
-        </p>
-        <div className="flex flex-col gap-2">
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-2xl">🏠</span>
+            Home
+          </CardTitle>
+          <CardDescription>
+            Your personal ureddit frontpage. Come here to check in with your favourite communities.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
           <Link href="/submit">
-            <Button className="w-full" size="sm">Create Post</Button>
+            <Button className="w-full" size="sm">
+              Create Post
+            </Button>
           </Link>
           <Link href="/communities/create">
-            <Button className="w-full" variant="outline" size="sm">Create Community</Button>
+            <Button className="w-full" variant="outline" size="sm">
+              Create Community
+            </Button>
           </Link>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Recently visited */}
       {recentComms.length > 0 && (
-        <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-          <h3 className="font-semibold text-sm">Recent Communities</h3>
-          <ul className="space-y-1">
-            {recentComms.map((community) => (
-              community && (
-                <li key={community.id}>
-                  <Link
-                    href={`/u/${community.name}`}
-                    className="flex items-center gap-3 rounded-md p-1.5 hover:bg-muted text-sm transition-colors"
-                  >
-                    {community.icon ? (
-                      <img src={community.icon} alt="" className="h-5 w-5 rounded-full" />
-                    ) : (
-                      <span className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                        {community.displayName[0]}
-                      </span>
-                    )}
-                    <span className="font-medium">u/{community.name}</span>
-                  </Link>
-                </li>
-              )
-            ))}
-          </ul>
-        </div>
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle className="text-sm">Recent Communities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              {recentComms.map(
+                (community) =>
+                  community && (
+                    <li key={community.id}>
+                      <CommunityRow community={community} />
+                    </li>
+                  ),
+              )}
+            </ul>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Top communities */}
-      <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-        <h3 className="font-semibold text-sm">Top Communities</h3>
-        <ul className="space-y-1">
-          {topCommunities.map((community, i) => (
-            <li key={community.id}>
-              <Link
-                href={`/u/${community.name}`}
-                className="flex items-center gap-3 rounded-md p-1.5 hover:bg-muted text-sm transition-colors"
-              >
-                <span className="text-muted-foreground w-4 text-xs">{i + 1}</span>
-                {community.icon ? (
-                  <img src={community.icon} alt="" className="h-5 w-5 rounded-full" />
-                ) : (
-                  <span className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                    {community.displayName[0]}
-                  </span>
-                )}
-                <span className="font-medium">u/{community.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle className="text-sm">Top Communities</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-1">
+            {topCommunities.map((community, i) => (
+              <li key={community.id}>
+                <CommunityRow community={community} rank={i + 1} />
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </aside>
   );
 }

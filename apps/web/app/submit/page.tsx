@@ -3,6 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TiptapEditor } from "@/components/editor/tiptap-editor";
 import { Image, Link2, FileText, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,12 +20,6 @@ import { cn } from "@/lib/utils";
 type Community = { id: string; name: string; displayName: string };
 type Flair = { id: string; name: string; color: string };
 type PostType = "text" | "image" | "link";
-
-const TABS: { type: PostType; label: string; icon: React.ReactNode }[] = [
-  { type: "text", label: "Text", icon: <FileText className="h-4 w-4" /> },
-  { type: "image", label: "Image", icon: <Image className="h-4 w-4" /> },
-  { type: "link", label: "Link", icon: <Link2 className="h-4 w-4" /> },
-];
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -36,7 +40,6 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Load all communities
   useEffect(() => {
     fetch("/api/communities/list")
       .then((r) => r.json())
@@ -49,9 +52,11 @@ export default function SubmitPage() {
       });
   }, [presetCommunity]);
 
-  // Load flairs when community changes
   useEffect(() => {
-    if (!selectedCommunity) { setFlairs([]); return; }
+    if (!selectedCommunity) {
+      setFlairs([]);
+      return;
+    }
     fetch(`/api/communities/${selectedCommunity.name}/flairs`)
       .then((r) => r.json())
       .then((data: Flair[]) => setFlairs(data));
@@ -65,7 +70,11 @@ export default function SubmitPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contentType: file.type }),
       });
-      const { url, fields, publicUrl } = await res.json() as { url: string; fields: Record<string, string>; publicUrl: string };
+      const { url, fields, publicUrl } = (await res.json()) as {
+        url: string;
+        fields: Record<string, string>;
+        publicUrl: string;
+      };
 
       const form = new FormData();
       Object.entries(fields).forEach(([k, v]) => form.append(k, v));
@@ -83,10 +92,22 @@ export default function SubmitPage() {
     e.preventDefault();
     setError("");
 
-    if (!title.trim()) { setError("Title is required"); return; }
-    if (!selectedCommunity) { setError("Please select a community"); return; }
-    if (postType === "image" && !imageUrl) { setError("Please upload an image"); return; }
-    if (postType === "link" && !linkUrl.trim()) { setError("Please enter a URL"); return; }
+    if (!title.trim()) {
+      setError("Title is required");
+      return;
+    }
+    if (!selectedCommunity) {
+      setError("Please select a community");
+      return;
+    }
+    if (postType === "image" && !imageUrl) {
+      setError("Please upload an image");
+      return;
+    }
+    if (postType === "link" && !linkUrl.trim()) {
+      setError("Please enter a URL");
+      return;
+    }
 
     setSubmitting(true);
     const res = await fetch("/api/posts", {
@@ -104,13 +125,16 @@ export default function SubmitPage() {
     });
 
     if (!res.ok) {
-      const data = await res.json() as { error: string };
+      const data = (await res.json()) as { error: string };
       setError(data.error ?? "Something went wrong");
       setSubmitting(false);
       return;
     }
 
-    const { post, communityName } = await res.json() as { post: { id: string }; communityName: string };
+    const { post, communityName } = (await res.json()) as {
+      post: { id: string };
+      communityName: string;
+    };
     router.push(`/u/${communityName}/comments/${post.id}`);
   }
 
@@ -118,127 +142,140 @@ export default function SubmitPage() {
     <main className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-xl font-bold mb-6">Create a post</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-
-        {/* Community selector */}
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Community</label>
-          <select
-            className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm outline-none focus:border-primary"
+          <Label htmlFor="community">Community</Label>
+          <Select
             value={selectedCommunity?.id ?? ""}
-            onChange={(e) => {
-              const c = communities.find((c) => c.id === e.target.value) ?? null;
+            onValueChange={(v) => {
+              const c = communities.find((c) => c.id === v) ?? null;
               setSelectedCommunity(c);
               setSelectedFlair("");
             }}
-            required
           >
-            <option value="" disabled>Choose a community</option>
-            {communities.map((c) => (
-              <option key={c.id} value={c.id}>u/{c.name}</option>
-            ))}
-          </select>
+            <SelectTrigger id="community" className="w-full">
+              <SelectValue placeholder="Choose a community" />
+            </SelectTrigger>
+            <SelectContent>
+              {communities.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  u/{c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Post type tabs */}
-        <div className="flex rounded-md border border-border overflow-hidden">
-          {TABS.map((tab) => (
-            <button
-              key={tab.type}
-              type="button"
-              onClick={() => setPostType(tab.type)}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium border-r border-border last:border-r-0 transition-colors",
-                postType === tab.type
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card text-muted-foreground hover:bg-muted"
-              )}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <Tabs value={postType} onValueChange={(v) => setPostType(v as PostType)}>
+          <TabsList className="w-full">
+            <TabsTrigger value="text">
+              <FileText className="size-4" />
+              Text
+            </TabsTrigger>
+            <TabsTrigger value="image">
+              <Image className="size-4" />
+              Image
+            </TabsTrigger>
+            <TabsTrigger value="link">
+              <Link2 className="size-4" />
+              Link
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Title */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium">Title</label>
-          <input
-            className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="An interesting title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={300}
-            required
-          />
-          <p className="text-right text-xs text-muted-foreground">{title.length}/300</p>
-        </div>
+          <TabsContent value="text" className="space-y-4 pt-2">
+            <TitleField title={title} setTitle={setTitle} />
+            <div className="space-y-1.5">
+              <Label>
+                Body{" "}
+                <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <TiptapEditor
+                placeholder="Text (optional)"
+                onChange={setContent}
+                minHeight="160px"
+              />
+            </div>
+          </TabsContent>
 
-        {/* Post body by type */}
-        {postType === "text" && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Body <span className="text-muted-foreground font-normal">(optional)</span></label>
-            <TiptapEditor placeholder="Text (optional)" onChange={setContent} minHeight="160px" />
-          </div>
-        )}
-
-        {postType === "image" && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Image</label>
-            {imagePreview ? (
-              <div className="relative inline-block">
-                <img src={imagePreview} alt="Preview" className="max-h-64 rounded-md object-contain" />
-                <button
-                  type="button"
-                  onClick={() => { setImagePreview(""); setImageUrl(""); }}
-                  className="absolute -top-2 -right-2 rounded-full bg-destructive p-0.5 text-white"
+          <TabsContent value="image" className="space-y-4 pt-2">
+            <TitleField title={title} setTitle={setTitle} />
+            <div className="space-y-1.5">
+              <Label>Image</Label>
+              {imagePreview ? (
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="max-h-64 rounded-md object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview("");
+                      setImageUrl("");
+                    }}
+                    className="absolute -top-2 -right-2 rounded-full bg-destructive p-0.5 text-white"
+                    aria-label="Remove image"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <label
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input bg-transparent dark:bg-input/30 p-8 text-sm text-muted-foreground cursor-pointer hover:border-ring transition-colors",
+                    uploading && "opacity-50 pointer-events-none",
+                  )}
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ) : (
-              <label className={cn(
-                "flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border bg-muted p-8 text-sm text-muted-foreground cursor-pointer hover:border-primary transition-colors",
-                uploading && "opacity-50 pointer-events-none"
-              )}>
-                <Upload className="h-6 w-6" />
-                <span>{uploading ? "Uploading…" : "Click to upload image"}</span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); }}
-                />
-              </label>
-            )}
-          </div>
-        )}
+                  <Upload className="h-6 w-6" />
+                  <span>{uploading ? "Uploading…" : "Click to upload image"}</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleImageUpload(f);
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </TabsContent>
 
-        {postType === "link" && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">URL</label>
-            <input
-              type="url"
-              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm outline-none focus:border-primary"
-              placeholder="https://example.com"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-            />
-          </div>
-        )}
+          <TabsContent value="link" className="space-y-4 pt-2">
+            <TitleField title={title} setTitle={setTitle} />
+            <div className="space-y-1.5">
+              <Label htmlFor="url">URL</Label>
+              <Input
+                id="url"
+                type="url"
+                placeholder="https://example.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
 
-        {/* Flair selector */}
         {flairs.length > 0 && (
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Flair <span className="text-muted-foreground font-normal">(optional)</span></label>
+            <Label>
+              Flair{" "}
+              <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
             <div className="flex flex-wrap gap-2">
               {flairs.map((flair) => (
                 <button
                   key={flair.id}
                   type="button"
-                  onClick={() => setSelectedFlair(selectedFlair === flair.id ? "" : flair.id)}
+                  onClick={() =>
+                    setSelectedFlair(selectedFlair === flair.id ? "" : flair.id)
+                  }
                   className={cn(
-                    "rounded px-2.5 py-1 text-xs font-semibold text-white transition-opacity",
-                    selectedFlair === flair.id ? "opacity-100 ring-2 ring-offset-1 ring-primary" : "opacity-70 hover:opacity-100"
+                    "rounded-full px-2.5 py-0.5 text-xs font-semibold text-white transition-opacity",
+                    selectedFlair === flair.id
+                      ? "opacity-100 ring-2 ring-offset-2 ring-offset-background ring-ring"
+                      : "opacity-70 hover:opacity-100",
                   )}
                   style={{ backgroundColor: flair.color }}
                 >
@@ -252,12 +289,37 @@ export default function SubmitPage() {
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         <div className="flex gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
           <Button type="submit" disabled={submitting || uploading}>
             {submitting ? "Posting…" : "Post"}
           </Button>
         </div>
       </form>
     </main>
+  );
+}
+
+function TitleField({
+  title,
+  setTitle,
+}: {
+  title: string;
+  setTitle: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor="title">Title</Label>
+      <Input
+        id="title"
+        placeholder="An interesting title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        maxLength={300}
+        required
+      />
+      <p className="text-right text-xs text-muted-foreground">{title.length}/300</p>
+    </div>
   );
 }

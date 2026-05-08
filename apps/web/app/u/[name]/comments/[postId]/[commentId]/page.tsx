@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { CommentItem } from "@/components/comments/comment-item";
 import type { CommentNode } from "@/components/comments/comment-list";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
@@ -74,14 +75,16 @@ export default async function SubThreadPage({
         <ChevronLeft className="h-4 w-4" />
         Back to {postRow.title}
       </Link>
-      <div className="rounded-lg border border-border bg-card p-4">
-        <CommentItem
-          comment={root}
-          postId={postId}
-          communityName={name}
-          onNewComment={() => {}}
-        />
-      </div>
+      <Card>
+        <CardContent>
+          <CommentItem
+            comment={root}
+            postId={postId}
+            communityName={name}
+            onNewComment={() => {}}
+          />
+        </CardContent>
+      </Card>
     </main>
   );
 }

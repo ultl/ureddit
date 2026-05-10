@@ -19,7 +19,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Upload, X } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type Profile = {
@@ -59,7 +61,6 @@ export default function SettingsPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   const [confirmName, setConfirmName] = useState("");
@@ -110,11 +111,12 @@ export default function SettingsPage() {
     setSaving(false);
     if (!res.ok) {
       const data = (await res.json()) as { error?: string };
-      setError(data.error ?? "Failed to save");
+      const msg = data.error ?? "Failed to save";
+      setError(msg);
+      toast.error(msg);
       return;
     }
-    setSavedAt(Date.now());
-    // Refresh nav (avatar in header, etc.)
+    toast.success("Settings saved");
     router.refresh();
   }
 
@@ -136,7 +138,19 @@ export default function SettingsPage() {
   }
 
   if (isPending || !session) {
-    return <main className="mx-auto max-w-2xl px-4 py-8 text-sm text-muted-foreground">Loading…</main>;
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-8 space-y-6">
+        <Skeleton className="h-7 w-24" />
+        <Skeleton className="h-32 w-full" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="size-20 rounded-full" />
+          <Skeleton className="h-9 w-28" />
+        </div>
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-9 w-32" />
+      </main>
+    );
   }
 
   const canDelete = confirmName === session.user.name;
@@ -253,9 +267,6 @@ export default function SettingsPage() {
           <Button onClick={handleSave} disabled={saving || uploadingAvatar || uploadingBanner || !name.trim()}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
-          {savedAt && !saving && (
-            <span className="text-sm text-muted-foreground">Saved.</span>
-          )}
         </div>
       </section>
 

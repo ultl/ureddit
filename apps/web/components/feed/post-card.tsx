@@ -158,12 +158,12 @@ export function PostCard({ post, compact = false, queryKey }: Props) {
           </button>
         </div>
         <div className="min-w-0 flex-1">
-          <Link href={`/posts/${post.id}`} className="text-sm font-medium hover:underline line-clamp-1">
+          <Link href={`/u/${post.communityName}/comments/${post.id}`} className="text-sm font-medium hover:underline line-clamp-1">
             {post.title}
           </Link>
           {meta}
         </div>
-        <Link href={`/posts/${post.id}`} className="flex items-center gap-1 shrink-0 text-xs text-muted-foreground hover:text-foreground">
+        <Link href={`/u/${post.communityName}/comments/${post.id}`} className="flex items-center gap-1 shrink-0 text-xs text-muted-foreground hover:text-foreground">
           <MessageSquare className="h-3 w-3" />
           {post.commentCount}
         </Link>
@@ -211,7 +211,7 @@ export function PostCard({ post, compact = false, queryKey }: Props) {
         <div className="min-w-0 flex-1 space-y-1.5">
           {meta}
 
-          <Link href={`/posts/${post.id}`} className="block">
+          <Link href={`/u/${post.communityName}/comments/${post.id}`} className="block">
             <h2 className="text-sm font-semibold leading-snug hover:text-primary transition-colors">
               {post.title}
             </h2>
@@ -231,7 +231,7 @@ export function PostCard({ post, compact = false, queryKey }: Props) {
           )}
 
           {post.type === "image" && post.imageUrl && (
-            <Link href={`/posts/${post.id}`}>
+            <Link href={`/u/${post.communityName}/comments/${post.id}`}>
               <img
                 src={post.imageUrl}
                 alt={post.title}
@@ -256,7 +256,7 @@ export function PostCard({ post, compact = false, queryKey }: Props) {
           )}
 
           <div className="flex items-center gap-1 pt-1">
-            <Link href={`/posts/${post.id}`}>
+            <Link href={`/u/${post.communityName}/comments/${post.id}`}>
               <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground">
                 <MessageSquare className="h-3.5 w-3.5" />
                 {post.commentCount} comments
@@ -267,7 +267,7 @@ export function PostCard({ post, compact = false, queryKey }: Props) {
               size="sm"
               className="gap-1.5 text-xs text-muted-foreground"
               onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/posts/${post.id}`);
+                navigator.clipboard.writeText(`${window.location.origin}/u/${post.communityName}/comments/${post.id}`);
                 toast.success("Link copied");
               }}
             >

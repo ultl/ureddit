@@ -5,6 +5,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Mention from "@tiptap/extension-mention";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { CommentNode } from "./comment-list";
 
@@ -93,6 +94,7 @@ function buildMentionSuggestion() {
 
 export function CommentForm({ postId, parentId, onSubmit, onCancel }: Props) {
   const [submitting, setSubmitting] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(true);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -104,6 +106,9 @@ export function CommentForm({ postId, parentId, onSubmit, onCancel }: Props) {
         suggestion: buildMentionSuggestion(),
       }),
     ],
+    onUpdate({ editor }) {
+      setIsEmpty(editor.isEmpty);
+    },
     editorProps: {
       attributes: {
         class: "outline-none prose prose-sm max-w-none dark:prose-invert min-h-[80px]",
@@ -126,6 +131,10 @@ export function CommentForm({ postId, parentId, onSubmit, onCancel }: Props) {
       const comment = (await res.json()) as CommentNode;
       onSubmit({ ...comment, children: [] });
       editor.commands.clearContent();
+      setIsEmpty(true);
+      toast.success(parentId ? "Reply posted" : "Comment posted");
+    } else {
+      toast.error("Failed to post comment");
     }
     setSubmitting(false);
   }
@@ -144,7 +153,7 @@ export function CommentForm({ postId, parentId, onSubmit, onCancel }: Props) {
             Cancel
           </Button>
         )}
-        <Button size="sm" onClick={handleSubmit} disabled={submitting || !editor || editor.isEmpty}>
+        <Button size="sm" onClick={handleSubmit} disabled={submitting || !editor || isEmpty}>
           {submitting ? "Submitting…" : "Comment"}
         </Button>
       </div>

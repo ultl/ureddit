@@ -211,13 +211,13 @@ Tasks are grouped by epic. Work top-to-bottom within each epic — later tasks d
 
 ## Epic 16 — Polish & QA
 
-- [ ] Loading skeletons for feed, post detail, comments, profile
-- [ ] Empty states: empty feed, no comments yet, no notifications, no search results
-- [ ] Error boundaries for failed API requests
-- [ ] Toast notifications for user actions (post created, comment submitted, settings saved, link copied)
-- [ ] Confirm the full vote toggle/switch behavior works correctly across post and comment contexts
-- [ ] Test infinite scroll edge cases: end of feed, network error mid-scroll
-- [ ] Test SSE reconnect behavior on connection drop
-- [ ] Verify system dark/light theme renders correctly for all pages
-- [ ] Verify mobile responsive layout on small viewports
-- [ ] Smoke test the full user flow: sign in → create community → create post → comment → vote → search → notifications → settings → sign out
+- [x] Loading skeletons for feed, post detail, comments, profile
+- [x] Empty states: empty feed, no comments yet, no notifications, no search results
+- [x] Error boundaries for failed API requests
+- [x] Toast notifications for user actions (post created, comment submitted, settings saved, link copied)
+- [x] Confirm the full vote toggle/switch behavior works correctly across post and comment contexts
+- [x] Test infinite scroll edge cases: end of feed, network error mid-scroll
+- [x] Test SSE reconnect behavior on connection drop
+- [x] Verify system dark/light theme renders correctly for all pages
+- [x] Verify mobile responsive layout on small viewports
+- [x] Smoke test the full user flow: sign in → create community → create post → comment → vote → search → notifications → settings → sign out

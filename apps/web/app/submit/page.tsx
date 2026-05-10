@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TiptapEditor } from "@/components/editor/tiptap-editor";
 import { Image, Link2, FileText, Upload, X } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type Community = { id: string; name: string; displayName: string };
@@ -135,6 +136,7 @@ export default function SubmitPage() {
       post: { id: string };
       communityName: string;
     };
+    toast.success("Post created");
     router.push(`/u/${communityName}/comments/${post.id}`);
   }
 

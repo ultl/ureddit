@@ -95,6 +95,7 @@ export function CommentForm({ postId, parentId, onSubmit, onCancel }: Props) {
   const [submitting, setSubmitting] = useState(false);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: "What are your thoughts?" }),

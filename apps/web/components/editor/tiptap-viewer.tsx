@@ -7,6 +7,7 @@ type Props = { content: string };
 
 export function TiptapViewer({ content }: Props) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [StarterKit],
     content: JSON.parse(content),
     editable: false,

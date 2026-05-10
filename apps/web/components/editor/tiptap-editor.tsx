@@ -15,6 +15,7 @@ type Props = {
 
 export function TiptapEditor({ placeholder, onChange, initialContent, className, minHeight = "120px" }: Props) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: placeholder ?? "Write something…" }),

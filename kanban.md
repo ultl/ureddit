@@ -193,19 +193,19 @@ Tasks are grouped by epic. Work top-to-bottom within each epic — later tasks d
 - [x] Comments tab — list of comments authored by this user with post context link
 - [x] Saved tab — visible only to profile owner; shows saved posts and comments
 - [x] `GET /api/users/[username]` — fetch profile data
-- [ ] Enqueue Meilisearch sync job after profile update
+- [x] Enqueue Meilisearch sync job after profile update
 
 ---
 
 ## Epic 15 — Settings
 
-- [ ] Settings page layout (`/settings`) — form sections for profile and account
-- [ ] Display name field + bio field with save button
-- [ ] Avatar upload (presigned URL → MinIO, same pattern as post images)
-- [ ] Banner upload (presigned URL → MinIO)
-- [ ] `PATCH /api/users/me` — update `users` record, enqueue Meilisearch sync
-- [ ] Delete account section — confirmation dialog ("Type your username to confirm")
-- [ ] `DELETE /api/users/me` — cascade delete all user-owned data, sign out session
+- [x] Settings page layout (`/settings`) — form sections for profile and account
+- [x] Display name field + bio field with save button
+- [x] Avatar upload (presigned URL → MinIO, same pattern as post images)
+- [x] Banner upload (presigned URL → MinIO)
+- [x] `PATCH /api/users/me` — update `users` record, enqueue Meilisearch sync
+- [x] Delete account section — confirmation dialog ("Type your username to confirm")
+- [x] `DELETE /api/users/me` — cascade delete all user-owned data, sign out session
 
 ---
 

@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { filename, contentType } = await req.json() as {
-    filename: string;
+  const { filename, contentType } = (await req.json()) as {
+    filename?: string;
     contentType: string;
   };
 
@@ -18,7 +18,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
   }
 
-  const ext = filename.split(".").pop() ?? "jpg";
+  const extFromName = filename?.includes(".") ? filename.split(".").pop() : undefined;
+  const extFromType = contentType.split("/")[1];
+  const ext = extFromName ?? extFromType ?? "bin";
   const key = `uploads/${crypto.randomUUID()}.${ext}`;
 
   const { url, fields } = await generatePresignedUpload(key, contentType);
